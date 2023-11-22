@@ -15,9 +15,9 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder  #
 from sklearn.compose import ColumnTransformer  # Scikit-learn: Column-wise transformations
 
 # Machine Learning - Model Selection and Evaluation
-from sklearn.model_selection import train_test_split  # Scikit-learn: Model selection, splitting dataset
+from sklearn.model_selection import train_test_split, GridSearchCV  # Scikit-learn: Model selection, splitting dataset
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score  # Scikit-learn: Model evaluation metrics
-from sklearn.metrics import silhouette_score, davies_bouldin_score  # Scikit-learn: Clustering performance metrics
+from sklearn.metrics import silhouette_score, davies_bouldin_score, classification_report  # Scikit-learn: Clustering performance metrics
 
 # Machine Learning - Classification Algorithms
 from sklearn.linear_model import PassiveAggressiveClassifier, LogisticRegression  # Scikit-learn: Linear models for classification

@@ -406,49 +406,146 @@ b. Interpréter votre résultat"""
 from data.result_classifier import *
 def question8(data):
 
-    # results = {}  # Dictionnaire pour stocker les résultats
+    results = {}  # Dictionnairy 
 
-    # # Drop missing values
-    # data.dropna(inplace=True)
+    # Drop missing values
+    data.dropna(inplace=True)
 
-    # # Separate numerical and categorical columns
-    # numerical_cols = data.select_dtypes(include=['number']).columns.tolist()
-    # categorical_cols = data.select_dtypes(exclude=['number']).columns.tolist()
-    # categorical_cols.remove("Metier")  # Assuming 'Metier' is your target variable
-    # categorical_cols.remove("Technologies")
+    # Separate numerical and categorical columns
+    numerical_cols = data.select_dtypes(include=['number']).columns.tolist()
+    categorical_cols = data.select_dtypes(exclude=['number']).columns.tolist()
 
-    # df_classifier = data[categorical_cols + numerical_cols].copy()
+    # Assuming 'Metier' is your target variable
+    categorical_cols.remove("Metier")
+    categorical_cols.remove("Technologies")
 
-    # # Normalizing numerical columns
-    # for col in numerical_cols:
-    #     df_classifier[col] = (df_classifier[col] - df_classifier[col].mean()) / df_classifier[col].std()
+    # Create a DataFrame for classification
+    df_classifier = data[categorical_cols + numerical_cols].copy()
 
-    # # One-hot encoding categorical columns
-    # df_classifier = pd.get_dummies(df_classifier, columns=categorical_cols, drop_first=True)
+    # Normalize numerical columns
+    for col in numerical_cols:
+        df_classifier[col] = (df_classifier[col] - df_classifier[col].mean()) / df_classifier[col].std()
 
-    # all_technologies = data['Technologies'].str.get_dummies(sep='/')
-    # df_classifier = pd.concat([df_classifier, all_technologies], axis=1)
+    # One-hot encode categorical columns
+    df_classifier = pd.get_dummies(df_classifier, columns=categorical_cols, drop_first=True)
+
+    # Extract technologies from 'Technologies' column and create binary columns
+    all_technologies = data['Technologies'].str.get_dummies(sep='/')
+    def clean_feature_names(df):
+        df.columns = df.columns.str.replace('[^A-Za-z0-9_]', '_')
+        return df
+
+    df_classifier = clean_feature_names(pd.concat([df_classifier, all_technologies], axis=1))
 
 
-    # # Split the data into train and test sets
-    # X=df_classifier
-    # y=data.Metier
+    # Create a LabelEncoder object for encoding the 'Metier' column
+    label_encoder = LabelEncoder()
 
-    # X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=.5,random_state =123)
-    # clf = LazyClassifier(verbose=0,ignore_warnings=True, custom_metric=None)
-    # models,predictions = clf.fit(X_train, X_test, y_train, y_test)
+    # Encode the 'Metier' column
+    data['Metier_encoded'] = label_encoder.fit_transform(data['Metier'])
 
-    # results["model"]=models
+    # Display the correspondence in a DataFrame
+    correspondence_df = pd.DataFrame({'Metier_original': data['Metier'].unique(), 'Metier_encoded': label_encoder.transform(data['Metier'].unique())})
+    results["label Encoding"]=correspondence_df
 
-    # return results
+    # Split the data into train and test sets
+    X = df_classifier
+    y = data.Metier_encoded
 
-    return {"Lazzy result":result_classifier}
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=123)
+
+    # # Initialize LazyClassifier
+    # clf = LazyClassifier(verbose=0, ignore_warnings=True, custom_metric=None)
+
+    # # Fit and evaluate models
+    # result_classifier, predictions = clf.fit(X_train, X_test, y_train, y_test)
+
+    results["LazyClassifier result"]=result_classifier
+
+    # # Créer un modèle LGBMClassifier
+    # lgbm = LGBMClassifier()
+
+    # # Définir la grille de paramètres à explorer
+    # param_grid = {
+    #     'n_estimators': [100, 200, 300],
+    #     'learning_rate': [0.01, 0.1, 0.2],
+    #     'max_depth': [3, 4, 5],
+    #     'min_child_samples': [5, 10, 20],
+    #     'subsample': [0.8, 0.9, 1.0]
+    # }
+
+    # # Créer l'objet GridSearchCV avec le modèle et la grille de paramètres
+    # grid_search = GridSearchCV(estimator=lgbm, param_grid=param_grid, cv=5, scoring='accuracy', n_jobs=-1, verbose=2)
+
+    # # Effectuer la recherche de grille
+    # grid_search.fit(X_train, y_train)
+
+
+    # best_model = grid_search.best_estimator_
+
+    # print("Best parameters found:")
+    # best_params = grid_search.best_params_
+    # print(best_params)
+    results["best_params_"] = best_params
+
+    # best_score = grid_search.best_score_
+    # print("Best accuracy found:", best_score)
+    results["best_score"] = best_score
+
+
+
+
+    # Create an instance of LGBMClassifier with the specific hyperparameters
+    lgbm = LGBMClassifier(**best_params)
+
+    # Fit the model to the training data
+    lgbm.fit(X_train, y_train)
+
+    # Use the trained model to make predictions on the test set
+    y_pred = lgbm.predict(X_test)
+
+    # Generate a classification report
+    report = classification_report(y_test, y_pred, target_names=correspondence_df['Metier_original'], output_dict=True)
+
+    # Create a DataFrame from the report
+    bias_df = pd.DataFrame(report).transpose()
+
+    # Display the DataFrame with bias information
+    results["bias_df"] = bias_df
+
+    return results
 
 commentaire8 = """
-C'est trop long de faire tourner le model en entier mais voila le résultat des différents models"""
+C'est trop long de faire tourner le model en entier mais voila le résultat des différents models
+
+Precision: Precision measures the accuracy of positive predictions made by the model. It is calculated as the ratio of true positives to the sum of true positives and false positives.
+
+Recall: Recall measures the ability of the model to correctly identify all relevant instances (true positives). It is calculated as the ratio of true positives to the sum of true positives and false negatives.
+
+F1-Score: The F1-score is the harmonic mean of precision and recall. It provides a balanced measure of a model's performance, taking both false positives and false negatives into account. 
+
+Support: Support represents the number of occurrences of each class in the test dataset. In your report, it shows the number of instances for each class.
+
+Accuracy: Accuracy is a measure of overall model performance, calculated as the ratio of correctly predicted instances to the total instances. 
+
+Macro Avg: The macro average is the unweighted average of precision, recall, and F1-score across all classes.
+
+Weighted Avg: The weighted average is the average of precision, recall, and F1-score, weighted by the number of instances for each class. It provides a measure of overall model performance while accounting for class imbalances.
+
+
+
+
+
+"""
 
 
 reponse_question(df, statement_question8,question8,commentaire8)
+
+
+
+
+
+
 
 #endregion 
 
