@@ -396,8 +396,59 @@ reponse_question(df, statement_question7,question7,commentaire)
 
 #region question 8
 
-statement_question8 = """"""
+statement_question8 = """**8)** Réaliser la prédiction des métiers manquants dans la base de données par 
+l'algorithme de votre choix 
 
+a. Justifier la performance de votre algorithme grâce à une métrique. 
+
+b. Interpréter votre résultat"""
+
+from data.result_classifier import *
+def question8(data):
+
+    # results = {}  # Dictionnaire pour stocker les résultats
+
+    # # Drop missing values
+    # data.dropna(inplace=True)
+
+    # # Separate numerical and categorical columns
+    # numerical_cols = data.select_dtypes(include=['number']).columns.tolist()
+    # categorical_cols = data.select_dtypes(exclude=['number']).columns.tolist()
+    # categorical_cols.remove("Metier")  # Assuming 'Metier' is your target variable
+    # categorical_cols.remove("Technologies")
+
+    # df_classifier = data[categorical_cols + numerical_cols].copy()
+
+    # # Normalizing numerical columns
+    # for col in numerical_cols:
+    #     df_classifier[col] = (df_classifier[col] - df_classifier[col].mean()) / df_classifier[col].std()
+
+    # # One-hot encoding categorical columns
+    # df_classifier = pd.get_dummies(df_classifier, columns=categorical_cols, drop_first=True)
+
+    # all_technologies = data['Technologies'].str.get_dummies(sep='/')
+    # df_classifier = pd.concat([df_classifier, all_technologies], axis=1)
+
+
+    # # Split the data into train and test sets
+    # X=df_classifier
+    # y=data.Metier
+
+    # X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=.5,random_state =123)
+    # clf = LazyClassifier(verbose=0,ignore_warnings=True, custom_metric=None)
+    # models,predictions = clf.fit(X_train, X_test, y_train, y_test)
+
+    # results["model"]=models
+
+    # return results
+
+    return {"Lazzy result":result_classifier}
+
+commentaire8 = """
+C'est trop long de faire tourner le model en entier mais voila le résultat des différents models"""
+
+
+reponse_question(df, statement_question8,question8,commentaire8)
 
 #endregion 
 
@@ -412,7 +463,7 @@ LIEN = {
     "Léo Dujourd'hui": "https://leo-dujourd-hui-digital-cv.streamlit.app",
 }
 SOURCES ={
-    "Github": "https://github.com/le-cmyk/Kickstarter-Dashboard"
+    "Github": "https://github.com/le-cmyk/job-interview"
 }
 
 
