@@ -477,8 +477,6 @@ def question8(fulldata):
     X = df_classifier.copy().drop(indices_null)
     y = df_metier.drop(indices_null)
 
-
-    st.write(y.isna().sum())
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=123)
 
 
