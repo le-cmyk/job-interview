@@ -459,7 +459,9 @@ def question8(fulldata):
 
     # Display the correspondence in a DataFrame
     correspondence_df = pd.DataFrame({'Metier_original': data['Metier'].unique(), 'Metier_encoded': label_encoder.transform(data['Metier'].unique())})
+    correspondence_df = correspondence_df.dropna()
     results["label Encoding"]=correspondence_df
+    
 
     # Split the data into train and test sets
     df_metier = data.Metier_encoded.copy()
@@ -468,7 +470,7 @@ def question8(fulldata):
     indices_null_df_classifier = set(np.where(df_classifier.isna())[0])
 
     # Get a set of indices with null values in y
-    indices_null_df_metier = set(np.where(df_metier.isna())[0])
+    indices_null_df_metier = set(np.where(data.Metier.isna())[0])
 
     # Merge the sets to obtain a unique list of indices with null values
     indices_null = list(indices_null_df_classifier.union(indices_null_df_metier))
