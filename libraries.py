@@ -3,6 +3,7 @@ import streamlit as st
 
 # Data Manipulation and Analysis
 import pandas as pd  # Pandas: Data manipulation and analysis
+import numpy as np
 import category_encoders as ce  # Category Encoders: Encoders for categorical features
 
 # Data Visualization

@@ -408,9 +408,6 @@ def question8(data):
 
     results = {}  # Dictionnairy 
 
-    # Drop missing values
-    data.dropna(inplace=True)
-
     # Separate numerical and categorical columns
     numerical_cols = data.select_dtypes(include=['number']).columns.tolist()
     categorical_cols = data.select_dtypes(exclude=['number']).columns.tolist()
@@ -449,10 +446,26 @@ def question8(data):
     results["label Encoding"]=correspondence_df
 
     # Split the data into train and test sets
-    X = df_classifier
-    y = data.Metier_encoded
+    df_metier = data.Metier_encoded.copy()
+
+    # Get a set of indices with null values in X
+    indices_null_df_classifier = set(np.where(df_classifier.isna())[0])
+
+    # Get a set of indices with null values in y
+    indices_null_df_metier = set(np.where(df_metier.isna())[0])
+
+    # Merge the sets to obtain a unique list of indices with null values
+    indices_null = list(indices_null_df_classifier.union(indices_null_df_metier))
+
+    # Remove corresponding rows in both DataFrames
+    X = df_classifier.copy().drop(indices_null)
+    y = df_metier.drop(indices_null)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=123)
+
+
+    # === LET'S search for a model
+
 
     # # Initialize LazyClassifier
     # clf = LazyClassifier(verbose=0, ignore_warnings=True, custom_metric=None)
@@ -461,6 +474,10 @@ def question8(data):
     # result_classifier, predictions = clf.fit(X_train, X_test, y_train, y_test)
 
     results["LazyClassifier result"]=result_classifier
+
+
+    # === LET'S finetune a model
+
 
     # # Créer un modèle LGBMClassifier
     # lgbm = LGBMClassifier()
@@ -493,6 +510,7 @@ def question8(data):
     results["best_score"] = best_score
 
 
+    # === LET'S understand the model
 
 
     # Create an instance of LGBMClassifier with the specific hyperparameters
@@ -512,6 +530,21 @@ def question8(data):
 
     # Display the DataFrame with bias information
     results["bias_df"] = bias_df
+
+
+    # === LET'S apply the model
+
+    # Get a list of indices with a Metier
+    indices_Metier_null = list(np.where(~data.Metier.isna())[0])
+
+    X_missing_metier = df_classifier.drop(indices_Metier_null)
+
+    # Make predictions
+    predicted_metier = lgbm.predict(X_missing_metier)
+
+    # Assign the predicted "Metier" values to the original DataFrame
+    results["Metier predicted"] = predicted_metier
+
 
     return results
 
@@ -538,14 +571,7 @@ Weighted Avg: The weighted average is the average of precision, recall, and F1-s
 
 """
 
-
 reponse_question(df, statement_question8,question8,commentaire8)
-
-
-
-
-
-
 
 #endregion 
 
