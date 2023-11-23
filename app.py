@@ -87,7 +87,7 @@ def question1(data):
 
     return result_dict
 
-reponse_question (df, "**1)** Combien y a t-il d'observations dans ce dataset? Y a t-il des valeurs manquantes ?", question1)
+reponse_question (df.copy(), "**1)** Combien y a t-il d'observations dans ce dataset? Y a t-il des valeurs manquantes ?", question1)
 #endregion
 
 #region question 2 
@@ -130,7 +130,7 @@ def question2(data):
 
     return results
 
-reponse_question (df, statement_question2, question2)
+reponse_question (df.copy(), statement_question2, question2)
 
 #endregion 
 
@@ -157,7 +157,7 @@ def question3(data):
 statement_question3 ="""**3)** Combien d'années d'expériences ont, en moyenne, chacun des profils : le 
 data scientist, le lead data scientist et le data engineer en moyenne ?"""
 
-reponse_question (df, statement_question3, question3)
+reponse_question (df.copy(), statement_question3, question3)
 
 
 #endregion
@@ -188,7 +188,7 @@ def question4(data):
     return results
 
 
-reponse_question (df, statement_question4, question4)
+reponse_question (df.copy(), statement_question4, question4)
 
 
 #endregion
@@ -222,7 +222,7 @@ catégorielle 'Exp_label' à 4 modalités : débutant, confirmé, avancé et exp
 Veuillez expliquer votre choix de la règle de transformation. """
 
 
-reponse_question(df , statement_question5,question5)
+reponse_question(df.copy() , statement_question5,question5)
 
 #endregion 
 
@@ -265,7 +265,7 @@ def question6(data):
     return results
 
 
-reponse_question(df, statement_question6,question6)
+reponse_question(df.copy(), statement_question6,question6)
 #endregion
 
 #region question 7 
@@ -282,6 +282,21 @@ c. Interpréter votre résultat."""
 
 def question7(data):
     results = {}  # Dictionnaire pour stocker les résultats
+
+    # Réalisation de 
+    def categorize_experience(x):
+        if x <= 2:
+            return 'débutant'
+        elif x <= 5:
+            return 'confirmé'
+        elif x <= 10:
+            return 'avancé'
+        else:
+            return 'expert'
+
+    # Appliquer la fonction à la colonne 'Experience'
+    data['Exp_label'] = data['Experience'].apply(categorize_experience)
+
 
     # Preprocessing the data
     data.dropna(inplace=True)
@@ -390,7 +405,7 @@ Index Davies-Bouldin
 
 **Remarque:** Les clusters ont été répartis suivant l'expérience ce qui parait cohérent avec notre dataset"""
 
-reponse_question(df, statement_question7,question7,commentaire)
+reponse_question(df.copy(), statement_question7,question7,commentaire)
 
 #endregion
 
@@ -404,8 +419,9 @@ a. Justifier la performance de votre algorithme grâce à une métrique.
 b. Interpréter votre résultat"""
 
 from data.result_classifier import *
-def question8(data):
+def question8(fulldata):
 
+    data = fulldata.copy()
     results = {}  # Dictionnairy 
 
     # Separate numerical and categorical columns
@@ -461,6 +477,8 @@ def question8(data):
     X = df_classifier.copy().drop(indices_null)
     y = df_metier.drop(indices_null)
 
+
+    st.write(y.isna().sum())
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=123)
 
 
@@ -534,10 +552,11 @@ def question8(data):
 
     # === LET'S apply the model
 
-    # Get a list of indices with a Metier
-    indices_Metier_null = list(np.where(~data.Metier.isna())[0])
 
-    X_missing_metier = df_classifier.drop(indices_Metier_null)
+    # Get a list of indices with a Metier
+    indices_Metier_non_null = df_classifier.index[fulldata['Metier'].notna()]
+
+    X_missing_metier = df_classifier.drop(indices_Metier_non_null)
 
     # Make predictions
     predicted_metier = lgbm.predict(X_missing_metier)
@@ -571,7 +590,7 @@ Weighted Avg: The weighted average is the average of precision, recall, and F1-s
 
 """
 
-reponse_question(df, statement_question8,question8,commentaire8)
+reponse_question(df.copy(), statement_question8,question8,commentaire8)
 
 #endregion 
 
